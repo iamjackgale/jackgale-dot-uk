@@ -12,6 +12,7 @@ node_modules/
 # Next.js build output
 .next/
 out/
+*.tsbuildinfo
 
 # OS generated files
 .DS_Store
@@ -25,5 +26,12 @@ yarn-error.log*
 
 # VS Code settings
 .vscode/
+
+# Lockfiles not used in this repo (pnpm is canonical)
+package-lock.json
+yarn.lock
+
+# Vercel local project metadata
+.vercel/
 
 /archive
