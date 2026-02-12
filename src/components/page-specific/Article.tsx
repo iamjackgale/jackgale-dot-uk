@@ -32,7 +32,7 @@ export default function Article({
       rel={isInternal ? undefined : 'noopener noreferrer'}
     >
       <div className="article-row">
-        <div className="article-column text-col" style={{ marginRight: 30 }}>
+        <div className="article-column text-col">
           <p className="article-header">{title}</p>
           <div className="article-meta">
             <span className="article-date">{date}</span>

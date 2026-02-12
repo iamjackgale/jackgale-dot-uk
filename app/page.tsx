@@ -44,9 +44,17 @@ const ABOUT_ROWS = [
 export default function HomePage() {
   const NAVBAR_HEIGHT = 64;
   const FOOTER_HEIGHT = 26;
+  const MOBILE_EXTRA_HEIGHT = 12;
 
   const getSectionScrollDistance = () => {
-    return Math.max(0, window.innerHeight - NAVBAR_HEIGHT - FOOTER_HEIGHT);
+    const viewportHeight = Math.max(window.innerHeight, window.visualViewport?.height ?? 0);
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+
+    if (isMobile) {
+      return Math.max(0, viewportHeight - NAVBAR_HEIGHT + MOBILE_EXTRA_HEIGHT);
+    }
+
+    return Math.max(0, viewportHeight - NAVBAR_HEIGHT - FOOTER_HEIGHT);
   };
 
   const scrollOnePage = () => {
