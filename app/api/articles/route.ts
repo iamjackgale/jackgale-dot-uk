@@ -7,7 +7,8 @@ type FeedArticle = {
   href: string;
   title: string;
   date: string;
-  category: string;
+  category?: string;
+  categories?: string[];
   tags: string[];
   description: string;
   image: string;
@@ -18,9 +19,21 @@ type RemoteArticle = {
   title?: string;
   date?: string;
   category?: string;
+  categories?: string[];
+  tags?: string[];
   description?: string;
   image?: string;
 };
+
+function normalizeTagList(values: unknown): string[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .map((value) => String(value).trim().toUpperCase())
+    .filter(Boolean);
+}
 
 function normalizeText(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
@@ -147,6 +160,7 @@ function loadMarkdownArticles(): FeedArticle[] {
         title: String(data.title || file.replace(/\.md$/, "")),
         date: formatMdDate(data.date),
         category,
+        categories: [],
         tags: tags.length > 0 ? tags : [category],
         description: String(data.short_description || ""),
         image: normalizeLocalImage(data.preview_image || data.header_image),
@@ -168,13 +182,21 @@ async function loadRemoteArticles(url: string): Promise<FeedArticle[]> {
         if (!href) {
           return null;
         }
-        const category = (item.category || "ARTICLE").toUpperCase();
+        const categories = normalizeTagList(item.categories);
+        const legacyCategory = item.category?.trim().toUpperCase();
+        const fallbackCategories = legacyCategory ? [legacyCategory] : [];
+        const normalizedCategories = categories.length > 0 ? categories : fallbackCategories;
+        const normalizedTags = normalizeTagList(item.tags);
+        const tags = normalizedTags.length > 0 ? normalizedTags : normalizedCategories;
+        const category = legacyCategory || normalizedCategories[0] || "ARTICLE";
+
         return {
           href,
           title: item.title || "Untitled",
           date: item.date || "",
           category,
-          tags: [category],
+          categories: normalizedCategories,
+          tags: tags.length > 0 ? tags : [category],
           description: item.description || "",
           image: resolveImage(item.image),
         } as FeedArticle;
@@ -231,6 +253,7 @@ function loadLegacyArticles(): FeedArticle[] {
         title,
         date,
         category: category || "ARCHIVE",
+        categories: [],
         tags: [category || "ARCHIVE"],
         description,
         image,

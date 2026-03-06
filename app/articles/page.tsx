@@ -10,6 +10,47 @@ import Loader from "../../src/components/page-general/Loader";
 import Article, { ArticleLink } from "../../src/components/page-specific/Article";
 import PageNavigation from "../../src/components/page-general/PageNavigation";
 
+type RawArticle = {
+  href?: string;
+  title?: string;
+  date?: string;
+  category?: string;
+  categories?: string[];
+  tags?: string[];
+  description?: string;
+  image?: string;
+};
+
+function normalizeTagValues(values?: string[]): string[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .map((value) => String(value).trim().toUpperCase())
+    .filter(Boolean);
+}
+
+function normalizeArticle(item: RawArticle): ArticleLink {
+  const categories = normalizeTagValues(item.categories);
+  const legacyCategory = item.category?.trim().toUpperCase();
+  const normalizedCategories = categories.length > 0 ? categories : legacyCategory ? [legacyCategory] : [];
+  const normalizedTags = normalizeTagValues(item.tags);
+  const tags = normalizedTags.length > 0 ? normalizedTags : normalizedCategories;
+  const category = legacyCategory || normalizedCategories[0] || "ARTICLE";
+
+  return {
+    href: item.href || "#",
+    title: item.title || "Untitled",
+    date: item.date || "",
+    category,
+    categories: normalizedCategories,
+    tags: tags.length > 0 ? tags : [category],
+    description: item.description || "",
+    image: item.image || "/logos/jack-gale-mark.png",
+  };
+}
+
 export default function ArticlesPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,9 +68,9 @@ export default function ArticlesPage() {
     const fetchArticles = async () => {
       try {
         const mdResponse = await fetch("/api/articles");
-        const mdArticles = await mdResponse.json();
+        const mdArticles = (await mdResponse.json()) as RawArticle[];
 
-        const allArticles = [...mdArticles].sort((a, b) => {
+        const allArticles = mdArticles.map(normalizeArticle).sort((a, b) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           return dateB - dateA;
