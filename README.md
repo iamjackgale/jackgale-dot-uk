@@ -50,7 +50,7 @@ Tooling:
 
 - TypeScript
 - pnpm (`packageManager` pinned to `pnpm@10.27.0`)
-- Node `20.x` (see `engines`)
+- Node `26.x` (see `engines`)
 
 ## Project Structure
 
@@ -83,7 +83,7 @@ Recommended configuration:
 - Install command: `corepack enable && corepack prepare pnpm@10.27.0 --activate && pnpm install --frozen-lockfile`
 - Build command: `pnpm build`
 - Output directory: leave default for Next.js
-- Node version: `20.x`
+- Node version: `26.x`
 
 ## Notes
 
